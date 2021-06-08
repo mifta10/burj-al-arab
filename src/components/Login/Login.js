@@ -3,7 +3,7 @@ import firebase from "firebase/app";
 import "firebase/auth";
 import firebaseConfig from './firebase.config';
 import { useContext } from 'react';
-import {UserContext} from '../../App';
+import { UserContext } from '../../App';
 import { useHistory, useLocation } from 'react-router';
 
 const Login = () => {
@@ -13,7 +13,7 @@ const Login = () => {
     const location = useLocation();
     const { from } = location.state || { from: { pathname: "/" } };
 
-    if(firebase.apps.length === 0){
+    if (firebase.apps.length === 0) {
         firebase.initializeApp(firebaseConfig);
     }
 
@@ -22,9 +22,10 @@ const Login = () => {
         firebase.auth()
             .signInWithPopup(provider)
             .then((result) => {
-                const {displayName, email} = result.user;
-                const signedInUser = {name : displayName, email}
+                const { displayName, email } = result.user;
+                const signedInUser = { name: displayName, email }
                 setloggedInUser(signedInUser);
+                storeAuthToken();
                 history.replace(from);
                 // ...
             }).catch((error) => {
@@ -33,6 +34,14 @@ const Login = () => {
                 var errorMessage = error.message;
                 console.log(errorMessage);
             });
+    }
+
+    const storeAuthToken = () => {
+        firebase.auth().currentUser.getIdToken(/* forceRefresh */ true).then(function (idToken) {
+            sessionStorage.setItem('token', idToken);
+        }).catch(function (error) {
+            // Handle error
+        });
     }
     return (
         <div>
